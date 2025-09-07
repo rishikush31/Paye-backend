@@ -46,8 +46,8 @@ exports.searchUsers = async (req, res) => {
 
 exports.setPassword = async (req, res) => {
 
-  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
-  const userId = req.user.id;
+  const userId = req.headers['x-user-id'];
+  if (!userId) return res.status(400).json({ error: "Missing userId in headers" });
   const { password } = req.body;
   if (!userId || !password) return res.status(400).json({ error: "Missing userId or password" });
 
