@@ -15,6 +15,6 @@ app.use(bodyParser.json());
 app.use("/auth", authRoutes);
 app.use("/user", userRoutes); 
 
-app.listen(process.env.PORT || 5000, () => {
-  console.log(`Auth service running at Port : ${process.env.PORT || 5000}`);
+app.listen(process.env.PORT || 3001, () => {
+  console.log(`Auth service running at Port : ${process.env.PORT || 3001}`);
 });

@@ -14,6 +14,6 @@ app.use(bodyParser.json());
 app.use("/expenses", expenseRoutes);
 app.use("/shares", shareRoutes);
 
-app.listen(process.env.PORT || 5000, () => {
-  console.log(`Expense service running at Port : ${process.env.PORT || 5000}`);
+app.listen(process.env.PORT || 3002, () => {
+  console.log(`Expense service running at Port : ${process.env.PORT || 3002}`);
 });

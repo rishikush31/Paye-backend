@@ -8,7 +8,7 @@ app.use(express.json());
 // Routes
 app.use("/notifications", notificationRoutes);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3003;
 
 console.log(process.env.PORT);
 
