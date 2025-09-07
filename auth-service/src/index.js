@@ -12,9 +12,8 @@ require("./config/passport");
 const app = express();
 app.use(bodyParser.json());
 
-// Routes
 app.use("/auth", authRoutes);
-app.use("/user", userRoutes); // protect /set-password via gateway header
+app.use("/user", userRoutes); 
 
 app.listen(process.env.PORT || 5000, () => {
   console.log(`Auth service running at Port : ${process.env.PORT || 5000}`);
