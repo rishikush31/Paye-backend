@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+
+  expense-service:
+    build: ./expense-service
+    container_name: expense-service
+    ports:
+      - "5000:5000"  # service accessible on localhost:3000
+    volumes:
+      - ./expense-service:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/expensedb
+      - PORT=5000
+    depends_on:
+      - db
+    
+  notification:
+    build: ./notification-service
+    container_name: notification-service
+    ports:
+      - "7000:7000"
+    volumes:
+      - ./notification-service:/usr/src/app   
+      - /usr/src/app/node_modules     
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/notificationdb
+    depends_on:
+      - db
+
+  auth:
+    build: ./auth-service
+    container_name: auth-service
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./auth-service:/usr/src/app   
+      - /usr/src/app/node_modules     
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/authdb
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    container_name: auth-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: authdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db-init/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./postgres-data:/var/lib/postgresql/data   
