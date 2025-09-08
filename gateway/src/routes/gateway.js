@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const gatewayController = require("../controllers/gatewayController");
 
 router.get("/health", (req, res) => {
   const uptime = process.uptime();

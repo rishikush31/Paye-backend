@@ -10,8 +10,6 @@ app.use("/notifications", notificationRoutes);
 
 const PORT = process.env.PORT || 3003;
 
-console.log(process.env.PORT);
-
 app.listen(PORT, () => {
-  console.log(`Expense service running on port ${PORT}`);
+  console.log(`Notification service running on port ${PORT}`);
 });

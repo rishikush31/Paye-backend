@@ -32,11 +32,11 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/", gatewayRoutes);
-app.use("/", proxyRoutes);
+  app.use("/", gatewayRoutes);
+  app.use("/", proxyRoutes);
 
-app.use(notFoundHandler);
-app.use(errorHandler);
+  app.use(notFoundHandler);
+  app.use(errorHandler);
 
 const PORT = process.env.GATEWAY_PORT || 3000;
 

@@ -18,9 +18,11 @@ function createProxy(serviceName) {
     target: serviceConfig.url,
     changeOrigin: true,
     timeout: serviceConfig.timeout || 5000,
+    /*
     pathRewrite: {
       [`^/${serviceName}`]: "",
     },
+    */
     onError: (err, req, res) => {
       console.error(`Proxy error for ${serviceName}:`, {
         message: err.message,
