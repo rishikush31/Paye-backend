@@ -24,19 +24,21 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
-
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
 
-  app.use("/", gatewayRoutes);
-  app.use("/", proxyRoutes);
+/*
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+*/
 
-  app.use(notFoundHandler);
-  app.use(errorHandler);
+app.use("/", gatewayRoutes);
+app.use("/", proxyRoutes);
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 const PORT = process.env.GATEWAY_PORT || 3000;
 

@@ -31,7 +31,7 @@ passport.use(
         }
 
         const insertResult = await pool.query(
-          "INSERT INTO users (name, email, google_id, created_at, updated_at) VALUES ($1, $2, $3, NOW(), NOW()) RETURNING *",
+          "INSERT INTO users (name, email, google_id, created_at) VALUES ($1, $2, $3, NOW()) RETURNING *",
           [name, email, googleId]
         );
         

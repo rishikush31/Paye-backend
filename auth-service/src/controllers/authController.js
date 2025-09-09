@@ -1,6 +1,11 @@
 const pool = require("../db");
 const bcrypt = require("bcrypt");
 const { generateAccessToken, generateRefreshToken } = require("../utils/token");
+const { default: PG } = require("pg");
+const fs = require("fs");
+const path = require("path");
+const jwt = require("jsonwebtoken");
+
 exports.signup = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -31,7 +36,9 @@ exports.signup = async (req, res) => {
       [name, email, hash]
     );
 
-    const user = result.rows[0];
+    console.log(r);
+
+    const user = r.rows[0];
     const payload = { id: user.id, email: user.email };
 
     const accessToken = generateAccessToken(payload);
@@ -85,15 +92,24 @@ exports.login = async (req, res) => {
 };
 
 exports.refreshToken = (req, res) => {
+
   const { refreshToken } = req.body;
+  console.log(refreshToken);
+
   if (!refreshToken) return res.status(400).json({ error: "Missing token" });
 
   try {
-    const publicKeyPath = path.join(__dirname, "keys", "public.pem");
-    const PUBLIC_KEY = fs.readFileSync(publicKeyPath, "utf8");
+
+    const PUBLIC_KEY = fs.readFileSync(
+      path.join(__dirname, "../keys/public.pem"),
+      "utf8"
+    );
+
     const payload = jwt.verify(refreshToken, PUBLIC_KEY, {
       algorithms: ["RS256"],
     });
+
+    console.log(payload);
     const accessToken = generateAccessToken({
       id: payload.id,
       email: payload.email,
@@ -105,7 +121,7 @@ exports.refreshToken = (req, res) => {
     } else if (err.name === "JsonWebTokenError") {
       return res.status(401).json({ error: "Invalid refresh token" });
     }
-    res.status(401).json({ error: "Token verification failed" });
+    res.status(401).json({ error: "Token verification failed", temp: err });
   }
 };
 

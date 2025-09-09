@@ -1,13 +1,9 @@
 version: "3.9"
 
 services:
-
-
   expense:
     build: ./expense-service
     container_name: expense-service
-    ports:
-      - "3002:3002"
     volumes:
       - ./expense-service:/usr/src/app
       - /usr/src/app/node_modules
@@ -15,12 +11,11 @@ services:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/expensedb
     depends_on:
       - db
-    
+    command: sh -c "npm install && npx nodemon --legacy-watch index.js"
+
   notification:
     build: ./notification-service
     container_name: notification-service
-    ports:
-      - "3003:3003"
     volumes:
       - ./notification-service:/usr/src/app   
       - /usr/src/app/node_modules     
@@ -28,12 +23,11 @@ services:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/notificationdb
     depends_on:
       - db
+    command: sh -c "npm install && npx nodemon --legacy-watch index.js"
 
   auth:
     build: ./auth-service
     container_name: auth-service
-    ports:
-      - "3001:3001"
     volumes:
       - ./auth-service:/usr/src/app   
       - /usr/src/app/node_modules     
@@ -41,6 +35,7 @@ services:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/authdb
     depends_on:
       - db
+    command: sh -c "npm install && npx nodemon --legacy-watch index.js"
 
   db:
     image: postgres:15
@@ -50,19 +45,17 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: db
-    ports:
-      - "5432:5432"
     volumes:
       - ./db-init/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./postgres-data:/var/lib/postgresql/data   
-    
+
   gateway:
     build: ./gateway
     container_name: gateway
     ports:
       - "3000:3000"
     volumes:
-      - ./auth-service:/usr/src/app   
+      - ./gateway:/usr/src/app   
       - /usr/src/app/node_modules     
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/authdb
@@ -71,3 +64,4 @@ services:
       - auth
       - expense
       - notification
+    command: sh -c "npm install && npx nodemon --legacy-watch index.js"

@@ -10,6 +10,7 @@ exports.getAllUsers = async (req, res) => {
   catch (err) {
     res.status(500).json({ error: "Failed to fetch users" });
   }
+  
 }
 
 exports.getUserById = async (req, res) => {
