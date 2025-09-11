@@ -24,29 +24,36 @@ exports.getMyNotifications = async (req, res) => {
 };
 
 exports.deleteNotification = async (req, res) => {
+
   try {
-        
-    const userId = req.headers['x-user-id'];
-    const notifId = req.params.id;
-    
+
+    const { userId, shareId } = req.body;
+
+    console.log(userId, shareId);
     // Ensure notification belongs to the user
     const check = await pool.query(
-      `SELECT id FROM notifications WHERE id = $1 AND user_id = $2`,
-      [notifId, userId]
+      `SELECT id FROM notifications WHERE expense_share_id = $1 AND user_id = $2 LIMIT 1`,
+      [shareId, userId]
     );
 
     if (check.rowCount === 0) {
       return res.status(403).json({ error: "Not authorized to delete this notification" });
     }
 
+    const notifId = check.rows[0].id;
+
     // Delete notification
     await pool.query(`DELETE FROM notifications WHERE id = $1`, [notifId]);
 
-    res.json({ message: "Notification deleted successfully" });
+    res.json({
+      message: "Notification deleted successfully",
+      deletedId: notifId
+    });
   } catch (err) {
     console.error("Error deleting notification:", err);
     res.status(500).json({ error: "Failed to delete notification" });
   }
+
 };
 
 // Create a notification

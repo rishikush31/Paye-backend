@@ -6,7 +6,7 @@ const notificationController = require("../controllers/notificationController");
 router.get("/", notificationController.getMyNotifications);
 
 // Delete a notification (must belong to user)
-router.delete("/:id", notificationController.deleteNotification);
+router.delete("/delete", notificationController.deleteNotification);
 
 router.post("/createNotification", notificationController.createNotification);
 

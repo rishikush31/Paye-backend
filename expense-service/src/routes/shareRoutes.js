@@ -6,4 +6,8 @@ router.get("/", shareController.listShares);
 
 router.patch("/:id", shareController.updateShareStatus);
 
+router.get("/toPay", shareController.moneyToPay);
+
+router.get("/toReceive", shareController.moneyToReceive);
+
 module.exports = router;

@@ -42,9 +42,15 @@ exports.createExpense = async (req, res) => {
         // --- Insert shares (one by one loop) ---
         for (const s of normalizedShares) {
             await pool.query(
-                `INSERT INTO expense_share (id, expense_id, participant_id, owed_to_user_id, amount) 
-         VALUES (gen_random_uuid(), $1, $2, $3, $4)`,
-                [expense.id, s.participantId || userId, s.owedToUserId, s.amount]
+                `INSERT INTO expense_share (id, expense_id, participant_id, owed_to_user_id, amount, status) 
+         VALUES (gen_random_uuid(), $1, $2, $3, $4, $5)`,
+                [
+                    expense.id,
+                    s.participantId || userId,
+                    s.owedToUserId,
+                    s.amount,
+                    s.owedToUserId === (s.participantId || userId) ? "ACKED" : "PENDING"
+                ]
             );
         }
 
@@ -82,10 +88,10 @@ exports.listExpenses = async (req, res) => {
 
 exports.getExpenseById = async (req, res) => {
     try {
-                
-        const ownerId = req.headers['x-user-id'];
+        const userId = req.headers['x-user-id'];
         const expenseId = req.params.id;
 
+        // 1. Fetch expense
         const expenseRes = await pool.query(
             `SELECT * FROM expenses WHERE id = $1`,
             [expenseId]
@@ -97,31 +103,75 @@ exports.getExpenseById = async (req, res) => {
 
         const expense = expenseRes.rows[0];
 
-        // check if user is a participant
-        if (expense.owner_id !== ownerId) {
+        // 2. Check ownership or participation
+        let isAuthorized = false;
+
+        if (expense.owner_id === userId) {
+            isAuthorized = true;
+        } else {
             const participantRes = await pool.query(
-                `SELECT * FROM expense_share WHERE expense_id = $1 AND participant_id = $2 LIMIT 1`,
-                [expenseId, ownerId]
+                `SELECT 1 FROM expense_share WHERE expense_id = $1 AND participant_id = $2 LIMIT 1`,
+                [expenseId, userId]
             );
 
-            if (participantRes.rowCount === 0) {
-                return res.status(403).json({ error: "Not authorized to view this expense" });
+            if (participantRes.rowCount > 0) {
+                isAuthorized = true;
             }
-
-            return res.status(201).json({ expense, shares: participantRes.rows });
-
         }
 
+        if (!isAuthorized) {
+            return res.status(403).json({ error: "Not authorized to view this expense" });
+        }
+
+        // 3. Fetch all shares (since user is authorized)
         const sharesRes = await pool.query(
             `SELECT * FROM expense_share WHERE expense_id = $1`,
             [expenseId]
         );
 
-        res.status(201).json({ expense, shares: sharesRes.rows });
+        res.status(200).json({ expense, shares: sharesRes.rows });
 
-    }
-    catch (err) {
+    } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Failed to fetch expense" });
     }
 };
+
+// use this if created_at is TIMESTAMP (with or without timezone)
+exports.totalExpense = async (req, res) => {
+  try {
+    const userId = req.headers["x-user-id"];
+    let { startDate, endDate } = req.body;
+
+    if (!userId) return res.status(400).json({ error: "Missing x-user-id header" });
+    if (!startDate || !endDate) return res.status(400).json({ error: "startDate and endDate required" });
+
+    // Parse and normalize to day boundaries (UTC)
+    const start = new Date(startDate);
+    start.setUTCHours(0, 0, 0, 0);
+
+    const endExclusive = new Date(endDate);
+    endExclusive.setUTCDate(endExclusive.getUTCDate() + 1); // next day
+    endExclusive.setUTCHours(0, 0, 0, 0);
+
+    const result = await pool.query(
+      `SELECT COALESCE(SUM(total_amount), 0) AS total_expense
+       FROM expenses
+       WHERE owner_id = $1
+         AND created_at >= $2
+         AND created_at < $3`,
+      [userId, start.toISOString(), endExclusive.toISOString()]
+    );
+
+    return res.json({
+      userId,
+      startDate: start.toISOString(),
+      endDate: new Date(endExclusive.getTime() - 1).toISOString(), // endDate back to end-of-day for response
+      totalExpense: result.rows[0].total_expense,
+    });
+  } catch (err) {
+    console.error("getTotalExpense error:", err);
+    res.status(500).json({ error: "Failed to calculate total expense" });
+  }
+};
+

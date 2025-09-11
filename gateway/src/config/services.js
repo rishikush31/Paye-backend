@@ -26,6 +26,12 @@ const SERVICES = {
     requireAuth: true,
     timeout: 5000,
   },
+  shares: {
+    name: "Share Service",
+    url: process.env.EXPENSE_SERVICE_URL || "http://expense:3002",
+    requireAuth: true,
+    timeout: 5000,
+  },
   notifications: {
     name: "Notification Service",
     url: process.env.NOTIFICATION_SERVICE_URL || "http://notification:3003",

@@ -6,6 +6,9 @@ router.post("/", expenseController.createExpense);
 
 router.get("/", expenseController.listExpenses);
 
+router.get("/totalExpense", expenseController.totalExpense);
+
 router.get("/:id", expenseController.getExpenseById);
+
 
 module.exports = router;

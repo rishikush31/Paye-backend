@@ -19,9 +19,10 @@ CREATE TABLE IF NOT EXISTS expense_share (
     status VARCHAR(120) DEFAULT 'PENDING',
     created_at TIMESTAMPTZ DEFAULT now()
 );
+
 CREATE TABLE notifications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id VARCHAR(255) NOT NULL,
+    user_id UUID NOT NULL,
     expense_share_id VARCHAR(255) NOT NULL, 
     created_at TIMESTAMPTZ DEFAULT now()
 );
